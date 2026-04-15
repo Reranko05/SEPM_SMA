@@ -60,7 +60,9 @@ class PreferencesProvider extends ChangeNotifier {
           ..dietType = data['dietType'] ?? 'OMNIVORE'
           ..calorieLimit = (data['calorieLimit'] ?? 2000) as int
           ..budget = (data['budget'] ?? 15.0).toDouble()
-          ..spiceLevel = (data['spiceLevel'] ?? 3) as int;
+          ..spiceLevel = (data['spiceLevel'] ?? 3) as int
+          ..proteinGoalGrams = (data['proteinGoalGrams'] ?? 50) as int
+          ..carbsLimitGrams = (data['carbsLimitGrams'] ?? 300) as int;
       }
       return null;
     } catch (e) {

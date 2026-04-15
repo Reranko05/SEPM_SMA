@@ -65,6 +65,7 @@ public class MenuItem {
     public String getDietType() { return dietType; }
     public void setDietType(String dietType) { this.dietType = dietType; }
 
+    @JsonIgnore
     public Restaurant getRestaurant() { return restaurant; }
     public void setRestaurant(Restaurant restaurant) { this.restaurant = restaurant; }
 }

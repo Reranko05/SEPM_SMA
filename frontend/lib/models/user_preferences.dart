@@ -4,6 +4,8 @@ class UserPreferences {
   int calorieLimit;
   double budget;
   int spiceLevel;
+  int proteinGoalGrams;
+  int carbsLimitGrams;
 
   UserPreferences({
     required this.username,
@@ -11,6 +13,8 @@ class UserPreferences {
     required this.calorieLimit,
     required this.budget,
     required this.spiceLevel,
+    this.proteinGoalGrams = 50,
+    this.carbsLimitGrams = 300,
   });
 
   Map<String, dynamic> toJson() => {
@@ -18,7 +22,9 @@ class UserPreferences {
         'dietType': dietType,
         'calorieLimit': calorieLimit,
         'budget': budget,
-        'spiceLevel': spiceLevel,
+      'spiceLevel': spiceLevel,
+      'proteinGoalGrams': proteinGoalGrams,
+      'carbsLimitGrams': carbsLimitGrams,
       };
 
   factory UserPreferences.empty(String username) => UserPreferences(username: username, dietType: 'OMNIVORE', calorieLimit: 2000, budget: 15.0, spiceLevel: 3);

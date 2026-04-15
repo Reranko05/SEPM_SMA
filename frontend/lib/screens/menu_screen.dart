@@ -72,7 +72,7 @@ class _MenuScreenState extends State<MenuScreen> {
                               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                                 Text(m.name, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                 const SizedBox(height: 6),
-                                Text('${m.calories} kcal • ${m.dietType}'),
+                                Text('${m.calories} kcal • ${m.proteinGrams} g protein • ${m.carbsGrams} g carbs • ${m.dietType}'),
                               ]),
                             ),
                             Column(children: [

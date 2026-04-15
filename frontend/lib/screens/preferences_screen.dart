@@ -24,6 +24,8 @@ class PreferencesScreen extends StatefulWidget {
 class _PreferencesScreenState extends State<PreferencesScreen> {
   final _calCtrl = TextEditingController();
   final _budgetCtrl = TextEditingController();
+  final _proteinCtrl = TextEditingController();
+  final _carbsCtrl = TextEditingController();
   String diet = 'OMNIVORE';
   double spice = 3;
   TimeOfDay breakfast = const TimeOfDay(hour: 8, minute: 0);
@@ -39,6 +41,8 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
   void dispose() {
     _calCtrl.dispose();
     _budgetCtrl.dispose();
+    _proteinCtrl.dispose();
+    _carbsCtrl.dispose();
     super.dispose();
   }
 
@@ -59,6 +63,8 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
         _calCtrl.text = saved.calorieLimit.toString();
         _budgetCtrl.text = saved.budget.toString();
         spice = saved.spiceLevel.toDouble();
+        _proteinCtrl.text = saved.proteinGoalGrams.toString();
+        _carbsCtrl.text = saved.carbsLimitGrams.toString();
       });
     }
     // load local schedule settings
@@ -97,6 +103,8 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
       calorieLimit: int.tryParse(_calCtrl.text) ?? 2000,
       budget: double.tryParse(_budgetCtrl.text) ?? 15.0,
       spiceLevel: spice.toInt(),
+      proteinGoalGrams: int.tryParse(_proteinCtrl.text) ?? 50,
+      carbsLimitGrams: int.tryParse(_carbsCtrl.text) ?? 300,
     );
     try {
       await prefsProvider.savePreferences(prefs);
@@ -213,6 +221,10 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             DropdownButtonFormField<String>(value: diet, items: const [DropdownMenuItem(value: 'OMNIVORE', child: Text('Omnivore')), DropdownMenuItem(value: 'VEGETARIAN', child: Text('Vegetarian')), DropdownMenuItem(value: 'VEGAN', child: Text('Vegan'))], onChanged: (v) => setState(() => diet = v ?? 'OMNIVORE')),
             const SizedBox(height: 8),
             TextField(controller: _calCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Calorie Limit')),
+            const SizedBox(height: 8),
+            TextField(controller: _proteinCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Min Protein (g)')),
+            const SizedBox(height: 8),
+            TextField(controller: _carbsCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Max Carbs (g)')),
             const SizedBox(height: 8),
             TextField(controller: _budgetCtrl, keyboardType: TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Budget')),
             const SizedBox(height: 8),

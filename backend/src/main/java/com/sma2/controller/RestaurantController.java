@@ -27,7 +27,8 @@ public class RestaurantController {
 
     @GetMapping("/restaurants")
     public ResponseEntity<List<Restaurant>> listRestaurants() {
-        return ResponseEntity.ok(restaurantRepo.findAll());
+        // use repository method that fetches menuItems to avoid lazy-loading errors during JSON serialization
+        return ResponseEntity.ok(restaurantRepo.findAllWithMenuItems());
     }
 
     @GetMapping("/restaurants/{id}/menu")

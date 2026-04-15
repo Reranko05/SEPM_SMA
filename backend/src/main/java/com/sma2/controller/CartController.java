@@ -1,18 +1,21 @@
 package com.sma2.controller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import com.sma2.foodapi.model.Meal;
 import com.sma2.service.CartService;
@@ -63,7 +66,7 @@ public class CartController {
     }
 
     @GetMapping
-    public ResponseEntity<?> getCart(@AuthenticationPrincipal UserDetails user, @RequestParam(required = false) String username) {
+    public ResponseEntity<List<Map<String, Object>>> getCart(@AuthenticationPrincipal UserDetails user, @RequestParam(required = false) String username) {
         UUID userId = resolveUserId(user, username);
         return cartService.getCart(userId)
                 .map(list -> {
@@ -87,7 +90,8 @@ public class CartController {
                             existing.put("quantity", q + 1);
                         }
                     }
-                    return ResponseEntity.ok(new java.util.ArrayList<>(agg.values()));
-                }).orElse(ResponseEntity.ok(java.util.List.of()));
+                List<Map<String, Object>> result = new ArrayList<>(agg.values());
+                return ResponseEntity.ok(result);
+            }).orElse(ResponseEntity.ok(List.of()));
     }
 }
