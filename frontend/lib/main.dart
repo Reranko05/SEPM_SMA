@@ -62,6 +62,7 @@ class MyApp extends StatelessWidget {
           '/auth': (_) => const AuthScreen(),
           '/preferences': (_) => const PreferencesScreen(),
           '/recommendation': (_) => const RecommendationScreen(),
+          '/cart': (_) => CartScreen(),
           '/home': (_) => const RootShell(),
         },
       ),
