@@ -12,7 +12,7 @@ Future<void> backgroundRecommendationCallback(int id) async {
     final username = prefs.getString('username');
     if (username == null || username.isEmpty) return;
 
-    final api = ApiService(baseUrl: 'http://192.168.29.196:8080');
+    final api = ApiService();
     // fetch recommendation
     final data = await api.getJson('/api/recommendation?username=$username', auth: true);
     Map<String, dynamic>? mealJson;

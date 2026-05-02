@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'backend_host_stub.dart' if (dart.library.io) 'backend_host_io.dart';
+import '../config/app_config.dart';
 
 class ApiService {
   final String baseUrl;
-  ApiService({String? baseUrl}) : baseUrl = baseUrl ?? defaultBackendHost();
+  ApiService({String? baseUrl}) : baseUrl = baseUrl ?? AppConfig.baseUrl;
 
   Future<dynamic> postJson(String path, Map<String, dynamic> body, {bool auth = false}) async {
     final headers = await _headers(auth);

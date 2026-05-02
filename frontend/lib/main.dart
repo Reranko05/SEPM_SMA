@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final api = ApiService(baseUrl: 'http://10.135.85.223:8080');
+    final api = ApiService();
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider(api: api)),
