@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/preferences_provider.dart';
 import '../providers/recommendation_provider.dart';
+import '../providers/cart_provider.dart';
 import '../services/auth_provider.dart';
 
 class SMADashboard extends StatefulWidget {
@@ -12,6 +13,7 @@ class SMADashboard extends StatefulWidget {
 }
 
 class _SMADashboardState extends State<SMADashboard> {
+  bool _autoFilling = false;
   @override
   void initState() {
     super.initState();
@@ -125,6 +127,64 @@ class _SMADashboardState extends State<SMADashboard> {
                   ),
                 ),
               ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // 🔥 TEST AUTO FILL (simulate scheduler)
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: (_autoFilling || auth.username == null || auth.username!.isEmpty)
+                    ? null
+                    : () async {
+                        setState(() => _autoFilling = true);
+                        try {
+                          final prefsProv = Provider.of<PreferencesProvider>(context, listen: false);
+                          final cart = Provider.of<CartProvider>(context, listen: false);
+
+                          // ensure we have preferences cached or fetch them explicitly
+                          if (prefsProv.preferences == null && auth.username != null) {
+                            await prefsProv.getPreferences(auth.username!);
+                          }
+
+                          // reuse existing recommendation flow
+                          await rec.fetchRecommendation(auth.username!);
+
+                          final meals = rec.meals;
+                          if (meals.isEmpty) {
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('No recommendations found')));
+                          } else {
+                            int added = 0;
+                            for (final m in meals) {
+                              try {
+                                await cart.add(m);
+                                added++;
+                              } catch (e) {
+                                // continue on per-item error
+                              }
+                            }
+                            // ignore: avoid_print
+                            print('Test Auto Fill added ${meals.length} meals: ${meals.map((e) => e.name).join(', ')}');
+                            if (!mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Auto-filled cart with $added items')));
+                          }
+                        } catch (e) {
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed: $e')));
+                        } finally {
+                          if (mounted) setState(() => _autoFilling = false);
+                        }
+                      },
+                child: _autoFilling ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Test Auto Fill'),
+              ),
             ),
 
             const SizedBox(height: 20),

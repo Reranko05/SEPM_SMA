@@ -53,9 +53,17 @@ public class MealPlannerService {
         int totalCarbs = 0;
         double totalPrice = 0.0;
 
+        // enforce an upper bound on allowed calories (10-15% over target)
+        double overhead = (targetCalories <= 400) ? 0.10 : 0.15;
+        int allowedMax = (int) Math.ceil(targetCalories * (1.0 + overhead));
+        int maxComboItems = (targetCalories <= 400) ? 2 : Integer.MAX_VALUE;
+
         for (Meal m : sorted) {
+            if (selected.size() >= maxComboItems) break;
             if (maxCarbs != null && totalCarbs + m.getCarbsGrams() > maxCarbs) continue;
             if (maxBudget != null && totalPrice + m.getPrice() > maxBudget) continue;
+            // do not add if it would push calories beyond allowed max
+            if (totalCalories + m.getCalories() > allowedMax) continue;
             selected.add(m);
             totalCalories += m.getCalories();
             totalProtein += m.getProteinGrams();
@@ -64,7 +72,7 @@ public class MealPlannerService {
             if (totalCalories >= targetCalories && totalProtein >= targetProtein) break;
         }
 
-        // 3) If still not meeting targets, return best-effort (selected may be empty)
+        // 3) If still not meeting targets, attempt refinement; otherwise fallback to best single
         // Optional refinement: remove redundant meals while keeping constraints satisfied
         if (!selected.isEmpty()) {
             boolean changed;
@@ -92,12 +100,34 @@ public class MealPlannerService {
             } while (changed);
         }
 
-        // fill response
-        for (Meal m : selected) res.getItems().add(MealDto.fromMeal(m));
-        res.setTotalCalories(totalCalories);
-        res.setTotalProtein(totalProtein);
-        res.setTotalCarbs(totalCarbs);
-        res.setTotalPrice(totalPrice);
+        // If selected meets at least some of the targets, return it
+        if (!selected.isEmpty() && (totalCalories > 0)) {
+            for (Meal m : selected) res.getItems().add(MealDto.fromMeal(m));
+            res.setTotalCalories(totalCalories);
+            res.setTotalProtein(totalProtein);
+            res.setTotalCarbs(totalCarbs);
+            res.setTotalPrice(totalPrice);
+            return res;
+        }
+
+        // No valid combo found — pick best single meal under allowedMax if possible,
+        // otherwise pick the single meal closest to targetCalories
+        Meal singleFallback = candidates.stream()
+            .filter(m -> m.getCalories() <= allowedMax)
+            .min(Comparator.comparingInt(m -> Math.abs(m.getCalories() - targetCalories)))
+            .orElse(null);
+        if (singleFallback == null) {
+            singleFallback = candidates.stream()
+                .min(Comparator.comparingInt(m -> Math.abs(m.getCalories() - targetCalories)))
+                .orElse(null);
+        }
+        if (singleFallback != null) {
+            res.getItems().add(MealDto.fromMeal(singleFallback));
+            res.setTotalCalories(singleFallback.getCalories());
+            res.setTotalProtein(singleFallback.getProteinGrams());
+            res.setTotalCarbs(singleFallback.getCarbsGrams());
+            res.setTotalPrice(singleFallback.getPrice());
+        }
         return res;
     }
 }
