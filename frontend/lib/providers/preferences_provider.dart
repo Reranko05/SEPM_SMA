@@ -8,6 +8,7 @@ class PreferencesProvider extends ChangeNotifier {
   final ApiService api;
   AuthProvider? _auth;
   bool loading = false;
+  UserPreferences? _prefs;
 
   PreferencesProvider({required this.api}) {
     loadSmaActive();
@@ -44,6 +45,7 @@ class PreferencesProvider extends ChangeNotifier {
     notifyListeners();
     try {
       await api.postJson('/api/preferences', prefs.toJson(), auth: true);
+      _prefs = prefs;
     } finally {
       loading = false;
       notifyListeners();
@@ -51,18 +53,20 @@ class PreferencesProvider extends ChangeNotifier {
   }
 
   Future<UserPreferences?> getPreferences(String username) async {
+    if (loading) return null;
     loading = true;
-    notifyListeners();
     try {
       final data = await api.getJson('/api/preferences?username=${Uri.encodeComponent(username)}', auth: true);
       if (data is Map<String, dynamic>) {
-        return UserPreferences.empty(username)
+        final p = UserPreferences.empty(username)
           ..dietType = data['dietType'] ?? 'OMNIVORE'
           ..calorieLimit = (data['calorieLimit'] ?? 2000) as int
           ..budget = (data['budget'] ?? 15.0).toDouble()
           ..spiceLevel = (data['spiceLevel'] ?? 3) as int
           ..proteinGoalGrams = (data['proteinGoalGrams'] ?? 50) as int
           ..carbsLimitGrams = (data['carbsLimitGrams'] ?? 300) as int;
+        _prefs = p;
+        return p;
       }
       return null;
     } catch (e) {
@@ -72,4 +76,6 @@ class PreferencesProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  UserPreferences? get preferences => _prefs;
 }
