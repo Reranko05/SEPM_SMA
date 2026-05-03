@@ -67,7 +67,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
       setState(() {
         diet = saved.dietType;
         _calCtrl.text = saved.calorieLimit.toString();
-        _budgetCtrl.text = saved.budget.toString();
+        _budgetCtrl.text = saved.budget.toStringAsFixed(0);
         spice = saved.spiceLevel.toDouble();
         _proteinCtrl.text = saved.proteinGoalGrams.toString();
         _carbsCtrl.text = saved.carbsLimitGrams.toString();
@@ -108,7 +108,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
       username: auth.username!,
       dietType: diet,
       calorieLimit: int.tryParse(_calCtrl.text) ?? 2000,
-      budget: double.tryParse(_budgetCtrl.text) ?? 15.0,
+      budget: double.tryParse(_budgetCtrl.text) ?? 500.0,
       spiceLevel: spice.toInt(),
       proteinGoalGrams: int.tryParse(_proteinCtrl.text) ?? 50,
       carbsLimitGrams: int.tryParse(_carbsCtrl.text) ?? 300,
@@ -251,7 +251,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             const SizedBox(height: 8),
             TextField(controller: _carbsCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Max Carbs (g)')),
             const SizedBox(height: 8),
-            TextField(controller: _budgetCtrl, keyboardType: TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Budget')),
+            TextField(controller: _budgetCtrl, keyboardType: TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Budget (₹)')),
             const SizedBox(height: 8),
             Row(children: [const Text('Spice'), Expanded(child: Slider(value: spice, min: 1, max: 5, divisions: 4, onChanged: (v) => setState(() => spice = v)))]),
             const SizedBox(height: 16),

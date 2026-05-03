@@ -27,5 +27,5 @@ class UserPreferences {
       'carbsLimitGrams': carbsLimitGrams,
       };
 
-  factory UserPreferences.empty(String username) => UserPreferences(username: username, dietType: 'OMNIVORE', calorieLimit: 2000, budget: 15.0, spiceLevel: 3);
+  factory UserPreferences.empty(String username) => UserPreferences(username: username, dietType: 'OMNIVORE', calorieLimit: 2000, budget: 500.0, spiceLevel: 3);
 }

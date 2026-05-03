@@ -14,7 +14,7 @@ class RecommendationCard extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(meal.name, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
           const SizedBox(height: 8),
-          Row(children: [Flexible(child: Text('Calories: ${meal.calories}')), const SizedBox(width: 12), Flexible(child: Text('Price: \$${meal.price.toStringAsFixed(2)}'))]),
+          Row(children: [Flexible(child: Text('Calories: ${meal.calories}')), const SizedBox(width: 12), Flexible(child: Text('Price: ₹${meal.price.toStringAsFixed(0)}'))]),
           const SizedBox(height: 8),
           Row(children: [Flexible(child: Text('Rating: ${meal.rating}')), const SizedBox(width: 12), Flexible(child: Text('Diet: ${meal.dietType}'))]),
         ]),
