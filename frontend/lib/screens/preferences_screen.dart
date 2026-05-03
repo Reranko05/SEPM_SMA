@@ -190,7 +190,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
     var scheduled = DateTime(now.year, now.month, now.day, t.hour, t.minute);
     var notifyAt = scheduled.subtract(const Duration(hours: 1));
     if (_testScheduler) {
-      notifyAt = DateTime.now().add(const Duration(seconds: 30));
+      notifyAt = DateTime.now().add(const Duration(seconds: 10));
       // ignore: avoid_print
       print('TEST SCHEDULE: $label at $notifyAt');
     }
