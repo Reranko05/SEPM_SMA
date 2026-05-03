@@ -23,42 +23,51 @@ Future<void> backgroundRecommendationCallback(int id) async {
     final api = ApiService();
     // fetch recommendation
     final data = await api.getJson('/api/recommendation?username=$username', auth: true);
-    Map<String, dynamic>? mealJson;
-    if (data.isEmpty) {
-      mealJson = null;
+    List<Map<String, dynamic>> meals = [];
+    if (data == null) {
+      meals = [];
     } else if (data is Map && data.containsKey('items')) {
       final items = data['items'] as List;
-      if (items.isNotEmpty) mealJson = items.first as Map<String, dynamic>;
-    } else if (data is List && data.isNotEmpty) {
-      mealJson = (data as List).first as Map<String, dynamic>;
+      meals = items.map((e) => e as Map<String, dynamic>).toList();
+    } else if (data is List) {
+      meals = (data as List).map((e) => e as Map<String, dynamic>).toList();
     } else if (data is Map) {
-      mealJson = data as Map<String, dynamic>;
+      meals = [data as Map<String, dynamic>];
     }
 
-    if (mealJson != null) {
-      // Debug: recommended meal name
+    if (meals.isNotEmpty) {
+      // Debug: recommended meal names
       // ignore: avoid_print
-      print('SCHEDULER: recommended=${mealJson['name']}');
-      // persist recommendation for app to pick up
-      await prefs.setString('auto_reco', jsonEncode(mealJson));
-      // show notification
+      print('SCHEDULER: recommended=${meals.map((m) => m['name']).toList()}');
+
+      // persist full recommendation list for app to pick up
+      await prefs.setString('auto_reco', jsonEncode(meals));
+      // debug: list of meal names
+      // ignore: avoid_print
+      print('Scheduler meals: ${meals.map((e) => e["name"]).toList()}');
+
+      // show notification about the recommendation (use first meal name for brevity)
       final notifier = NotificationService();
       await notifier.init();
-      await notifier.show(id, 'Your recommended meal is ready 🍽️', mealJson['name'] ?? 'Tap to view');
+      await notifier.show(id, 'Your recommended meal is ready 🍽️', meals.first['name'] ?? 'Tap to view');
 
-      // Debug: notification was sent
-      // ignore: avoid_print
-      print('NOTIFICATION SENT');
-
-      // Auto-add to cart from background if user opted in. This posts the meal
-      // to the backend cart endpoint and sets a local flag so the UI can react.
+      // Auto-add all recommended meals to cart from background if user opted in.
       try {
-        await api.postJson('/api/cart?username=$username', mealJson, auth: true);
-        await prefs.setBool('auto_reco_added', true);
-        await notifier.show(id + 1, 'Added to cart', '${mealJson['name']} was added to your cart');
-        // Debug: cart add completed
-        // ignore: avoid_print
-        print('SCHEDULER: added to cart ${mealJson['name']}');
+        int added = 0;
+        for (final m in meals) {
+          try {
+            await api.postJson('/api/cart?username=$username', m, auth: true);
+            added++;
+          } catch (e) {
+            // continue on per-item error
+          }
+        }
+        if (added > 0) {
+          await prefs.setBool('auto_reco_added', true);
+          await notifier.show(id + 1, 'Added to cart', '$added item(s) were added to your cart');
+          // ignore: avoid_print
+          print('SCHEDULER: added $added items to cart');
+        }
       } catch (e) {
         // ignore background POST errors but keep the persisted recommendation
       }
