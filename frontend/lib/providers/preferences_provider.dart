@@ -78,4 +78,9 @@ class PreferencesProvider extends ChangeNotifier {
   }
 
   UserPreferences? get preferences => _prefs;
+
+  void clearPreferences() {
+    _prefs = null;
+    notifyListeners();
+  }
 }

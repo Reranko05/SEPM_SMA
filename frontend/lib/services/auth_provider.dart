@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import '../providers/preferences_provider.dart';
 import 'api_service.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -65,11 +67,15 @@ Future<void> login(String user, String pass) async {
     }
   }
 
-  Future<void> logout() async {
+  Future<void> logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('jwt');
     await prefs.remove('username');
     username = null;
+    // clear cached preferences for the user
+    try {
+      Provider.of<PreferencesProvider>(context, listen: false).clearPreferences();
+    } catch (_) {}
     notifyListeners();
   }
 
