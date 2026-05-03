@@ -30,7 +30,7 @@ class _AuthScreenState extends State<AuthScreen> {
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F4F2),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -38,9 +38,9 @@ class _AuthScreenState extends State<AuthScreen> {
             child: Column(children: [
               Container(
                 padding: const EdgeInsets.symmetric(vertical: 32),
-                decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)),
+                decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(16)),
                 child: Column(children: [
-                  const Icon(Icons.restaurant_menu, size: 48, color: Colors.orange),
+                  Icon(Icons.restaurant_menu, size: 48, color: Theme.of(context).colorScheme.secondary),
                   const SizedBox(height: 12),
                   const Text('Welcome to SMA', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 4),
@@ -57,7 +57,7 @@ class _AuthScreenState extends State<AuthScreen> {
                         width: double.infinity,
                         child: ElevatedButton(
                           onPressed: auth.loading ? null : _submit,
-                          style: ElevatedButton.styleFrom(backgroundColor: Colors.orange, padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                          style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                           child: auth.loading ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : Text(isLogin ? 'Login' : 'Create Account'),
                         ),
                       ),

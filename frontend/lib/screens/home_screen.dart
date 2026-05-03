@@ -29,10 +29,10 @@ class HomeScreen extends StatelessWidget {
         child: Column(children: [
           Container(
             padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: const Color(0xFFFFF2EE), borderRadius: BorderRadius.circular(12)),
+            decoration: BoxDecoration(color: Theme.of(context).colorScheme.secondary.withOpacity(0.08), borderRadius: BorderRadius.circular(12)),
             child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
               Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [Text('Deliver to', style: TextStyle(color: Colors.grey)), Text('Connaught Place', style: TextStyle(fontWeight: FontWeight.bold))]),
-              TextButton(onPressed: () {}, child: const Text('Manage', style: TextStyle(color: Colors.orange)))
+              TextButton(onPressed: () {}, child: Text('Manage', style: TextStyle(color: Theme.of(context).colorScheme.secondary)))
             ]),
           ),
           const SizedBox(height: 12),
@@ -52,7 +52,7 @@ class HomeScreen extends StatelessWidget {
                       ListTile(
                         title: Text(r['name']!),
                         subtitle: Text('${r['cuisine']} • 30-45 min • ₹300 for two'),
-                        trailing: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Colors.orange.shade100, borderRadius: BorderRadius.circular(8)), child: Text(r['rating']!, style: const TextStyle(color: Colors.orange))),
+                        trailing: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: Theme.of(context).colorScheme.secondary.withOpacity(0.12), borderRadius: BorderRadius.circular(8)), child: Text(r['rating']!, style: TextStyle(color: Theme.of(context).colorScheme.secondary))),
                       )
                     ]),
                   ),

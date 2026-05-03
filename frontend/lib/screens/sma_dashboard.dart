@@ -71,6 +71,9 @@ class _SMADashboardState extends State<SMADashboard> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('SMA Dashboard'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),
@@ -231,15 +234,16 @@ class _SMADashboardState extends State<SMADashboard> {
 
   // 🔥 Reusable section card
   Widget _sectionCard({required Widget child}) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 6,
             offset: const Offset(0, 3),
           )
         ],
@@ -258,29 +262,24 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: const Color(0xFFE8F5EC),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           children: [
             Text(
               value,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              style: theme.textTheme.titleMedium?.copyWith(fontSize: 16),
             ),
             const SizedBox(height: 4),
             Text(
               title,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              style: theme.textTheme.bodyMedium?.copyWith(fontSize: 12, color: Colors.grey[600]),
             ),
           ],
         ),

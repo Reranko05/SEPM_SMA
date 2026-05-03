@@ -54,8 +54,61 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         title: 'Smart Meal Autopilot',
         theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.orange),
           useMaterial3: true,
+          // Color system (organic green palette)
+          colorScheme: const ColorScheme(
+            brightness: Brightness.light,
+            primary: Color(0xFF0F2A1D), // deep green
+            onPrimary: Colors.white,
+            secondary: Color(0xFF6BE36B), // fresh green accent
+            onSecondary: Colors.white,
+            error: Colors.red,
+            onError: Colors.white,
+            background: Color(0xFFF5F7F6), // light neutral
+            onBackground: Color(0xFF222222),
+            surface: Colors.white, // card color
+            onSurface: Color(0xFF222222),
+          ),
+          primaryColor: const Color(0xFF0F2A1D),
+          scaffoldBackgroundColor: const Color(0xFFF5F7F6),
+          cardColor: Colors.white,
+          // Card theme: rounded, soft shadow
+          cardTheme: CardThemeData(
+            color: Colors.white,
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 0),
+          ),
+          // Elevated buttons: fresh green filled buttons
+          elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF6BE36B),
+              foregroundColor: Colors.white,
+              elevation: 2,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              textStyle: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          // Outlined buttons: soft border using secondary tint
+          outlinedButtonTheme: OutlinedButtonThemeData(
+            style: OutlinedButton.styleFrom(
+              side: BorderSide(color: const Color(0xFF1F4D2E).withOpacity(0.12)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
+              foregroundColor: const Color(0xFF0F2A1D),
+            ),
+          ),
+          // Switch theme: green accent when active
+          switchTheme: SwitchThemeData(
+            thumbColor: MaterialStateProperty.resolveWith((states) => const Color(0xFF6BE36B)),
+            trackColor: MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.selected) ? const Color(0xFF6BE36B).withOpacity(0.4) : Colors.grey.shade400),
+          ),
+          // Text theme basic tweaks
+          textTheme: const TextTheme(
+            titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF222222)),
+            bodyMedium: TextStyle(color: Color(0xFF222222)),
+          ),
         ),
         home: const RootShell(),
         routes: {
@@ -192,7 +245,7 @@ class _RootShellState extends State<RootShell> with WidgetsBindingObserver {
       bottomNavigationBar: Consumer<CartProvider>(builder: (_, cart, __) {
         return BottomNavigationBar(
           currentIndex: _index,
-          selectedItemColor: Colors.orange.shade700,
+          selectedItemColor: Theme.of(context).colorScheme.secondary,
           unselectedItemColor: Colors.grey,
           onTap: (i) {
             setState(() => _index = i);

@@ -63,6 +63,9 @@ class _MenuScreenState extends State<MenuScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.restaurantName),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        elevation: 0,
       ),
       body: loading
           ? const Center(child: CircularProgressIndicator())
@@ -98,16 +101,17 @@ class _MenuScreenState extends State<MenuScreen> {
   // ================= UI COMPONENTS =================
 
   Widget _menuCard(BuildContext context, Meal m, CartProvider cart) {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
+        color: theme.cardColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 8,
             offset: const Offset(0, 4),
           )
         ],
@@ -188,7 +192,6 @@ class _MenuScreenState extends State<MenuScreen> {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          backgroundColor: Colors.green,
                         ),
                         onPressed: () async {
                           try {
@@ -228,10 +231,10 @@ class _MenuScreenState extends State<MenuScreen> {
     return Material(
       borderRadius: BorderRadius.circular(12),
       elevation: 6,
-      child: Container(
+        child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.black,
+          color: Theme.of(context).colorScheme.primary,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -242,9 +245,7 @@ class _MenuScreenState extends State<MenuScreen> {
               style: const TextStyle(color: Colors.white),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-              ),
+              style: ElevatedButton.styleFrom(),
               onPressed: () => Navigator.pushNamed(context, '/cart'),
               child: const Text('View Cart'),
             )
