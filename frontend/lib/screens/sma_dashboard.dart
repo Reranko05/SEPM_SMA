@@ -13,6 +13,17 @@ class SMADashboard extends StatefulWidget {
 
 class _SMADashboardState extends State<SMADashboard> {
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final prefsProv = Provider.of<PreferencesProvider>(context, listen: false);
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      if (auth.username != null && auth.username!.isNotEmpty) {
+        prefsProv.getPreferences(auth.username!);
+      }
+    });
+  }
+  @override
   Widget build(BuildContext context) {
     final pref = Provider.of<PreferencesProvider>(context);
     final rec = Provider.of<RecommendationProvider>(context);
@@ -130,51 +141,24 @@ class _SMADashboardState extends State<SMADashboard> {
             Row(
               children: [
                 Expanded(
-                  child: Builder(builder: (context) {
-                    final prefsProv = Provider.of<PreferencesProvider>(context, listen: false);
-                    final auth = Provider.of<AuthProvider>(context, listen: false);
-                    final future = (auth.username != null) ? prefsProv.getPreferences(auth.username!) : Future.value(null);
-                    return FutureBuilder<dynamic>(
-                      future: future,
-                      builder: (c, snap) {
-                        final p = snap.data;
-                        final calories = (p != null && p.calorieLimit != null) ? '${p.calorieLimit}' : '-';
-                        return _StatCard(title: 'Calories', value: calories);
-                      },
-                    );
-                  }),
+                  child: _StatCard(
+                    title: 'Calories',
+                    value: (pref.preferences != null) ? '${pref.preferences!.calorieLimit}' : '-',
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Builder(builder: (context) {
-                    final prefsProv = Provider.of<PreferencesProvider>(context, listen: false);
-                    final auth = Provider.of<AuthProvider>(context, listen: false);
-                    final future = (auth.username != null) ? prefsProv.getPreferences(auth.username!) : Future.value(null);
-                    return FutureBuilder<dynamic>(
-                      future: future,
-                      builder: (c, snap) {
-                        final p = snap.data;
-                        final protein = (p != null && p.proteinGoalGrams != null) ? '${p.proteinGoalGrams}g' : '-';
-                        return _StatCard(title: 'Protein', value: protein);
-                      },
-                    );
-                  }),
+                  child: _StatCard(
+                    title: 'Protein',
+                    value: (pref.preferences != null) ? '${pref.preferences!.proteinGoalGrams}g' : '-',
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  child: Builder(builder: (context) {
-                    final prefsProv = Provider.of<PreferencesProvider>(context, listen: false);
-                    final auth = Provider.of<AuthProvider>(context, listen: false);
-                    final future = (auth.username != null) ? prefsProv.getPreferences(auth.username!) : Future.value(null);
-                    return FutureBuilder<dynamic>(
-                      future: future,
-                      builder: (c, snap) {
-                        final p = snap.data;
-                        final carbs = (p != null && p.carbsLimitGrams != null) ? '${p.carbsLimitGrams}g' : '-';
-                        return _StatCard(title: 'Carbs', value: carbs);
-                      },
-                    );
-                  }),
+                  child: _StatCard(
+                    title: 'Carbs',
+                    value: (pref.preferences != null) ? '${pref.preferences!.carbsLimitGrams}g' : '-',
+                  ),
                 ),
               ],
             ),
