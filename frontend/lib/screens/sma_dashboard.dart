@@ -75,44 +75,9 @@ class _SMADashboardState extends State<SMADashboard> {
 
             const SizedBox(height: 16),
 
-            // 🔥 ACTION BUTTONS
+            // 🔥 ACTION BUTTONS (Preferences)
             Row(
               children: [
-                Expanded(
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () async {
-                      if (auth.username == null || auth.username!.isEmpty) {
-                        if (!mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please log in to get suggestions'),
-                          ),
-                        );
-                        return;
-                      }
-
-                      try {
-                        await rec.fetchRecommendation(auth.username!);
-
-                        if (!mounted) return;
-                        Navigator.pushNamed(context, '/recommendation');
-                      } catch (e) {
-                        if (!mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Failed: $e')),
-                        );
-                      }
-                    },
-                    child: const Text('Get Suggestions'),
-                  ),
-                ),
-                const SizedBox(width: 12),
                 Expanded(
                   child: OutlinedButton(
                     style: OutlinedButton.styleFrom(
@@ -121,8 +86,7 @@ class _SMADashboardState extends State<SMADashboard> {
                         borderRadius: BorderRadius.circular(10),
                       ),
                     ),
-                    onPressed: () =>
-                        Navigator.pushNamed(context, '/preferences'),
+                    onPressed: () => Navigator.pushNamed(context, '/preferences'),
                     child: const Text('Preferences'),
                   ),
                 ),
@@ -183,7 +147,7 @@ class _SMADashboardState extends State<SMADashboard> {
                           if (mounted) setState(() => _autoFilling = false);
                         }
                       },
-                child: _autoFilling ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Test Auto Fill'),
+                child: _autoFilling ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)) : const Text('Instant Fill'),
               ),
             ),
 
