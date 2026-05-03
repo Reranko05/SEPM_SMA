@@ -52,6 +52,7 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Smart Meal Autopilot',
         theme: ThemeData(
           useMaterial3: true,
