@@ -52,10 +52,11 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
     _loadSaved();
   }
 
-  // Toggle this to true for quick scheduler testing (temporary)
-  static const bool TEST_SCHEDULER = true;
   // Single alarm id used to avoid duplicate scheduled callbacks
   static const int ALARM_ID = 1001;
+
+  // Runtime toggle: test scheduling mode (30s) vs real scheduling (meal time -1h)
+  bool _testScheduler = true;
 
   Future<void> _loadSaved() async {
     final auth = Provider.of<AuthProvider>(context, listen: false);
@@ -80,6 +81,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
         scheduleLunch = sp.getBool('scheduleLunch') ?? false;
         scheduleSnacks = sp.getBool('scheduleSnacks') ?? false;
         scheduleDinner = sp.getBool('scheduleDinner') ?? false;
+        _testScheduler = sp.getBool('test_scheduler_mode') ?? true;
         final b = sp.getString('time_breakfast');
         if (b != null) breakfast = TimeOfDay(hour: int.parse(b.split(':')[0]), minute: int.parse(b.split(':')[1]));
         final l = sp.getString('time_lunch');
@@ -114,43 +116,11 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
     try {
       await prefsProvider.savePreferences(prefs);
       // schedule notifications 1 hour before each enabled meal
-      Future<void> trySchedule(bool enabled, TimeOfDay t, int id, String label) async {
-        if (!enabled) return;
-        final now = DateTime.now();
-        var scheduled = DateTime(now.year, now.month, now.day, t.hour, t.minute);
-        var notifyAt = scheduled.subtract(const Duration(hours: 1));
-        // For quick testing override schedule to 30s from now when enabled
-        if (TEST_SCHEDULER) {
-          notifyAt = DateTime.now().add(const Duration(seconds: 30));
-          // ignore: avoid_print
-          print('TEST SCHEDULE: $label at $notifyAt');
-        }
-        if (notifyAt.isBefore(now)) notifyAt = notifyAt.add(const Duration(days: 1));
-        await notif.schedule(
-          id,
-          'Your meal is ready 🍽️',
-          'Tap to view $label recommendation',
-          notifyAt,
-        );
-        // schedule background callback to fetch recommendation and persist it
-        try {
-          // Cancel any existing alarm with the fixed ID to avoid duplicate triggers
-          try {
-            await AndroidAlarmManager.cancel(ALARM_ID);
-            // ignore: avoid_print
-            print('Cancelled existing alarm id=$ALARM_ID');
-          } catch (_) {}
-          await AndroidAlarmManager.oneShotAt(notifyAt, ALARM_ID, backgroundRecommendationCallback, exact: true, wakeup: true);
-        } catch (e) {
-          // ignore alarm scheduling errors; UI already scheduled a local notification
-          print('Alarm scheduling failed: $e');
-        }
-      }
       try {
-        await trySchedule(scheduleBreakfast, breakfast, 1001, 'Breakfast');
-        await trySchedule(scheduleLunch, lunch, 1002, 'Lunch');
-        await trySchedule(scheduleSnacks, snacks, 1003, 'Snacks');
-        await trySchedule(scheduleDinner, dinner, 1004, 'Dinner');
+        await _scheduleNotification(scheduleBreakfast, breakfast, 1001, 'Breakfast');
+        await _scheduleNotification(scheduleLunch, lunch, 1002, 'Lunch');
+        await _scheduleNotification(scheduleSnacks, snacks, 1003, 'Snacks');
+        await _scheduleNotification(scheduleDinner, dinner, 1004, 'Dinner');
       } on PlatformException catch (e) {
         // Exact alarms may be blocked on newer Android versions. Prompt user to allow exact alarms.
         showDialog(
@@ -212,6 +182,40 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
     }
   }
 
+  // Shared scheduling helper reused by _save() and toggle handler to avoid duplication
+  Future<void> _scheduleNotification(bool enabled, TimeOfDay t, int id, String label) async {
+    if (!enabled) return;
+    final notif = NotificationService();
+    final now = DateTime.now();
+    var scheduled = DateTime(now.year, now.month, now.day, t.hour, t.minute);
+    var notifyAt = scheduled.subtract(const Duration(hours: 1));
+    if (_testScheduler) {
+      notifyAt = DateTime.now().add(const Duration(seconds: 30));
+      // ignore: avoid_print
+      print('TEST SCHEDULE: $label at $notifyAt');
+    }
+    if (notifyAt.isBefore(now)) notifyAt = notifyAt.add(const Duration(days: 1));
+    await notif.schedule(
+      id,
+      'Your meal is ready 🍽️',
+      'Tap to view $label recommendation',
+      notifyAt,
+    );
+    // schedule background callback to fetch recommendation and persist it
+    try {
+      try {
+        await AndroidAlarmManager.cancel(ALARM_ID);
+        // ignore: avoid_print
+        print('Cancelled existing alarm id=$ALARM_ID');
+      } catch (_) {}
+      await AndroidAlarmManager.oneShotAt(notifyAt, ALARM_ID, backgroundRecommendationCallback, exact: true, wakeup: true);
+    } catch (e) {
+      // ignore alarm scheduling errors; UI already scheduled a local notification
+      // ignore: avoid_print
+      print('Alarm scheduling failed: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
@@ -248,6 +252,52 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             Row(children: [const Text('Spice'), Expanded(child: Slider(value: spice, min: 1, max: 5, divisions: 4, onChanged: (v) => setState(() => spice = v)))]),
             const SizedBox(height: 16),
             const Align(alignment: Alignment.centerLeft, child: Text('Meal Schedule', style: TextStyle(fontWeight: FontWeight.bold))),
+            const SizedBox(height: 8),
+            // Test mode toggle: when enabled, scheduled alarms fire after 30s for quick testing
+            SwitchListTile(
+              title: const Text('Test Mode (30 sec trigger)'),
+              value: _testScheduler,
+              onChanged: (v) async {
+                setState(() => _testScheduler = v);
+                try {
+                  final sp = await SharedPreferences.getInstance();
+                  await sp.setBool('test_scheduler_mode', v);
+                } catch (_) {}
+                // Cancel any existing alarm to avoid duplicate triggers
+                try {
+                  await AndroidAlarmManager.cancel(ALARM_ID);
+                  // ignore: avoid_print
+                  print('Cancelled existing alarm id=$ALARM_ID (on toggle)');
+                } catch (_) {}
+                // If enabling test mode and any schedule is active, schedule a quick 30s alarm
+                if (v && (scheduleBreakfast || scheduleLunch || scheduleSnacks || scheduleDinner)) {
+                  try {
+                    final notifyAt = DateTime.now().add(const Duration(seconds: 30));
+                    await AndroidAlarmManager.oneShotAt(notifyAt, ALARM_ID, backgroundRecommendationCallback, exact: true, wakeup: true);
+                    // ignore: avoid_print
+                    print('TEST MODE: scheduled immediate alarm at $notifyAt');
+                  } catch (e) {
+                    // ignore
+                    // ignore: avoid_print
+                    print('Failed to schedule immediate test alarm: $e');
+                  }
+                }
+                // If disabling test mode, reschedule real alarms immediately using saved schedule
+                if (!v) {
+                  try {
+                    if (scheduleBreakfast) await _scheduleNotification(scheduleBreakfast, breakfast, 1001, 'Breakfast');
+                    if (scheduleLunch) await _scheduleNotification(scheduleLunch, lunch, 1002, 'Lunch');
+                    if (scheduleSnacks) await _scheduleNotification(scheduleSnacks, snacks, 1003, 'Snacks');
+                    if (scheduleDinner) await _scheduleNotification(scheduleDinner, dinner, 1004, 'Dinner');
+                    // ignore: avoid_print
+                    print('Rescheduled real alarms after disabling test mode');
+                  } catch (e) {
+                    // ignore: avoid_print
+                    print('Failed to reschedule real alarms: $e');
+                  }
+                }
+              },
+            ),
             const SizedBox(height: 8),
             _buildScheduleRow('Breakfast', scheduleBreakfast, breakfast, (v) => setState(() => scheduleBreakfast = v), () async { final t = await showTimePicker(context: context, initialTime: breakfast); if (t != null) setState(() => breakfast = t); }),
             _buildScheduleRow('Lunch', scheduleLunch, lunch, (v) => setState(() => scheduleLunch = v), () async { final t = await showTimePicker(context: context, initialTime: lunch); if (t != null) setState(() => lunch = t); }),
