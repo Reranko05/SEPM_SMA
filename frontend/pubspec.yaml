@@ -28,14 +28,13 @@ flutter:
     - assets/logo.png
 
 flutter_native_splash:
-  color: "#F5F7F6"   # match your app background
-  image: assets/logo.png
+  color: "#b9e063"     # match the left/dominant green of your gradient
+  image: assets/splash_logo.png         
   android: true
   ios: true
-
   android_12:
-    image: assets/logo.png
-    icon_background_color: "#F5F7F6"
+    color: "#b9e063"
+    image: assets/splash_logo.png
   
 flutter_icons:
   android: true
