@@ -2,10 +2,14 @@ package com.sma2.service.impl;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sma2.entity.UserPreferences;
@@ -18,9 +22,12 @@ import com.sma2.service.RecommendationService;
 @Service
 public class RecommendationServiceImpl implements RecommendationService {
 
+    private static final Logger log = LoggerFactory.getLogger(RecommendationServiceImpl.class);
+
     private final FoodProviderService foodProvider;
     private final UserPreferencesRepository prefsRepo;
     private final RecommendationLogRepository logRepo;
+    private final MealPlannerService mealPlanner;
 
     // weights
     private final double w1 = 0.25; // calorie match
@@ -28,10 +35,11 @@ public class RecommendationServiceImpl implements RecommendationService {
     private final double w3 = 0.2;  // preference match
     private final double w4 = 0.3;  // rating
 
-    public RecommendationServiceImpl(FoodProviderService foodProvider, UserPreferencesRepository prefsRepo, RecommendationLogRepository logRepo) {
+    public RecommendationServiceImpl(FoodProviderService foodProvider, UserPreferencesRepository prefsRepo, RecommendationLogRepository logRepo, MealPlannerService mealPlanner) {
         this.foodProvider = foodProvider;
         this.prefsRepo = prefsRepo;
         this.logRepo = logRepo;
+        this.mealPlanner = mealPlanner;
     }
 
     @Override
@@ -60,7 +68,22 @@ public class RecommendationServiceImpl implements RecommendationService {
             if (filtered.isEmpty()) return Optional.empty();
         }
 
-        Meal best = filtered.stream().max(Comparator.comparingDouble(m -> score(m, prefs))).orElse(null);
+        // enforce calorie limit as a hard constraint for UI recommendations
+        List<Meal> calorieFiltered = filtered.stream().filter(m -> m.getCalories() <= prefs.getCalorieLimit()).collect(Collectors.toList());
+        if (calorieFiltered.isEmpty()) {
+            // No meals are <= calorie limit — pick the meal closest to the calorie limit instead
+            Meal closest = filtered.stream()
+                .min(Comparator.comparingInt(m -> Math.abs(m.getCalories() - prefs.getCalorieLimit())))
+                .orElse(null);
+            if (closest != null) {
+                calorieFiltered = List.of(closest);
+            } else {
+                // defensive fallback (shouldn't happen since filtered was checked earlier)
+                calorieFiltered = filtered;
+            }
+        }
+
+        Meal best = calorieFiltered.stream().max(Comparator.comparingDouble(m -> score(m, prefs))).orElse(null);
         // log
         if (best != null) {
             com.sma2.entity.RecommendationLog log = new com.sma2.entity.RecommendationLog();
@@ -87,6 +110,41 @@ public class RecommendationServiceImpl implements RecommendationService {
             prefs.setBudget(prefs.getBudget() * 1.1);
             filtered = applyRules(meals, prefs);
             if (filtered.isEmpty()) return List.of();
+        }
+
+        // try to build a meal plan combo from filtered candidates
+        try {
+            // enforce calorie constraint for planner candidates so planner cannot bypass it
+            List<Meal> calorieCandidates = filtered.stream().filter(m -> m.getCalories() <= prefs.getCalorieLimit()).collect(Collectors.toList());
+            if (calorieCandidates.isEmpty()) {
+                // if none are <= limit, pick the single meal closest to the calorie limit
+                Meal closest = filtered.stream().min(Comparator.comparingInt(m -> Math.abs(m.getCalories() - prefs.getCalorieLimit()))).orElse(null);
+                if (closest != null) calorieCandidates = List.of(closest);
+            }
+
+            com.sma2.service.model.MealPlanResponse plan = mealPlanner.buildMealPlan(calorieCandidates, prefs);
+            if (plan != null && !plan.getItems().isEmpty()) {
+                // map DTO ids back to existing Meal objects from the candidate set (do not reconstruct entities)
+                Map<String, Meal> mealMap = calorieCandidates.stream().collect(Collectors.toMap(
+                    Meal::getId,
+                    m -> m,
+                    (a, b) -> a
+                ));
+
+                List<Meal> comboMeals = plan.getItems().stream()
+                    .map(dto -> mealMap.get(dto.getId()))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+
+                if (comboMeals.size() != plan.getItems().size()) {
+                    log.warn("Meal planner returned invalid IDs, falling back");
+                } else if (!comboMeals.isEmpty()) {
+                    // preserve planner-chosen size (do not truncate to topN)
+                    return comboMeals;
+                }
+            }
+        } catch (Exception ex) {
+            log.error("Meal planner failed", ex);
         }
 
         return filtered.stream().sorted(Comparator.comparingDouble(m -> -score(m, prefs))).limit(topN).collect(Collectors.toList());
