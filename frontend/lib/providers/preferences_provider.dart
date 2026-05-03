@@ -9,9 +9,19 @@ class PreferencesProvider extends ChangeNotifier {
   AuthProvider? _auth;
   bool loading = false;
   UserPreferences? _prefs;
+  // schedule fields (loaded from SharedPreferences)
+  bool scheduleBreakfast = false;
+  bool scheduleLunch = false;
+  bool scheduleSnacks = false;
+  bool scheduleDinner = false;
+  TimeOfDay breakfastTime = const TimeOfDay(hour: 8, minute: 0);
+  TimeOfDay lunchTime = const TimeOfDay(hour: 13, minute: 0);
+  TimeOfDay snacksTime = const TimeOfDay(hour: 16, minute: 0);
+  TimeOfDay dinnerTime = const TimeOfDay(hour: 19, minute: 0);
 
   PreferencesProvider({required this.api}) {
     loadSmaActive();
+    loadSchedule();
   }
 
   // load persisted SMA active flag
@@ -66,6 +76,8 @@ class PreferencesProvider extends ChangeNotifier {
           ..proteinGoalGrams = (data['proteinGoalGrams'] ?? 50) as int
           ..carbsLimitGrams = (data['carbsLimitGrams'] ?? 300) as int;
         _prefs = p;
+        // refresh local schedule values when preferences are fetched
+        await loadSchedule();
         return p;
       }
       return null;
@@ -82,5 +94,36 @@ class PreferencesProvider extends ChangeNotifier {
   void clearPreferences() {
     _prefs = null;
     notifyListeners();
+  }
+
+  Future<void> loadSchedule() async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      scheduleBreakfast = sp.getBool('scheduleBreakfast') ?? false;
+      scheduleLunch = sp.getBool('scheduleLunch') ?? false;
+      scheduleSnacks = sp.getBool('scheduleSnacks') ?? false;
+      scheduleDinner = sp.getBool('scheduleDinner') ?? false;
+      final b = sp.getString('time_breakfast');
+      if (b != null) {
+        final parts = b.split(':');
+        breakfastTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      }
+      final l = sp.getString('time_lunch');
+      if (l != null) {
+        final parts = l.split(':');
+        lunchTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      }
+      final s = sp.getString('time_snacks');
+      if (s != null) {
+        final parts = s.split(':');
+        snacksTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      }
+      final d = sp.getString('time_dinner');
+      if (d != null) {
+        final parts = d.split(':');
+        dinnerTime = TimeOfDay(hour: int.parse(parts[0]), minute: int.parse(parts[1]));
+      }
+      notifyListeners();
+    } catch (_) {}
   }
 }

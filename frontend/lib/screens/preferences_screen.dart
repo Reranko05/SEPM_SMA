@@ -163,6 +163,10 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
         await sp.setString('time_lunch', '${lunch.hour}:${lunch.minute}');
         await sp.setString('time_snacks', '${snacks.hour}:${snacks.minute}');
         await sp.setString('time_dinner', '${dinner.hour}:${dinner.minute}');
+        // refresh provider schedule state so other screens use provider as single source of truth
+        try {
+          await prefsProvider.loadSchedule();
+        } catch (_) {}
       } catch (_) {}
       if (mounted) {
         // Show confirmation dialog instead of navigating to recommendations

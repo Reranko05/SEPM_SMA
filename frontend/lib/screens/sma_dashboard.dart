@@ -25,6 +25,43 @@ class _SMADashboardState extends State<SMADashboard> {
       }
     });
   }
+
+  String _buildUpcomingMealText(BuildContext context) {
+    final now = DateTime.now();
+    final prefs = Provider.of<PreferencesProvider>(context);
+    final List<Map<String, dynamic>> candidates = [];
+    if (prefs.scheduleBreakfast) candidates.add({'name': 'Breakfast', 'time': prefs.breakfastTime});
+    if (prefs.scheduleLunch) candidates.add({'name': 'Lunch', 'time': prefs.lunchTime});
+    if (prefs.scheduleSnacks) candidates.add({'name': 'Snacks', 'time': prefs.snacksTime});
+    if (prefs.scheduleDinner) candidates.add({'name': 'Dinner', 'time': prefs.dinnerTime});
+
+    if (candidates.isEmpty) return 'No meals scheduled';
+
+    DateTime? bestDt;
+    String bestName = '';
+    for (final c in candidates) {
+      final TimeOfDay t = c['time'] as TimeOfDay;
+      DateTime dt = DateTime(now.year, now.month, now.day, t.hour, t.minute);
+      String when = 'Today';
+      if (!dt.isAfter(now)) {
+        dt = dt.add(const Duration(days: 1));
+        when = 'Tomorrow';
+      }
+      if (bestDt == null || dt.isBefore(bestDt)) {
+        bestDt = dt;
+        bestName = c['name'] as String;
+      }
+    }
+
+    if (bestDt == null) return 'No meals scheduled';
+    // find the TimeOfDay to format
+    final timeOfDay = TimeOfDay(hour: bestDt.hour, minute: bestDt.minute);
+    final whenText = (bestDt.day == now.day) ? 'Today' : 'Tomorrow';
+    final formatted = timeOfDay.format(context);
+    return '$bestName • $whenText $formatted';
+  }
+
+  
   @override
   Widget build(BuildContext context) {
     final pref = Provider.of<PreferencesProvider>(context);
@@ -62,13 +99,13 @@ class _SMADashboardState extends State<SMADashboard> {
             _sectionCard(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                children: const [
-                  Text(
+                children: [
+                  const Text(
                     'Upcoming Meal',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
-                  SizedBox(height: 4),
-                  Text('Dinner • Today 7:00 PM'),
+                  const SizedBox(height: 4),
+                  Text(_buildUpcomingMealText(context)),
                 ],
               ),
             ),
