@@ -16,6 +16,7 @@ dependencies:
   android_intent_plus: ^5.0.0
   timezone : ^0.9.4
   flutter_native_splash: ^2.4.7
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -35,3 +36,8 @@ flutter_native_splash:
   android_12:
     image: assets/logo.png
     icon_background_color: "#F5F7F6"
+  
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
