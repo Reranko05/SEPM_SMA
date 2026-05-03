@@ -264,7 +264,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             const SizedBox(height: 8),
             // Test mode toggle: when enabled, scheduled alarms fire after 30s for quick testing
             SwitchListTile(
-              title: const Text('Test Mode (30 sec trigger)'),
+              title: const Text('Test Mode (15 sec trigger)'),
               value: _testScheduler,
               onChanged: (v) async {
                 setState(() => _testScheduler = v);
