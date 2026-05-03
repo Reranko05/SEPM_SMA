@@ -21,13 +21,16 @@ public class RecommendationScheduler {
         this.recommendationService = recommendationService;
     }
 
-    @Scheduled(cron = "0 0 8,13,20 * * *")
+    // Temporary: run frequently for testing (30s). Revert to cron schedule for production.
+    @Scheduled(fixedRate = 30000)
     public void runRecommendationForAllUsers() {
-        log.info("Scheduler triggered: running recommendations (demo: single test user)");
+        log.info("SCHEDULER TRIGGERED: running recommendations (demo: single test user)");
         // For demo, assume a single user id; real system would iterate Users
         try {
             UUID demoUser = UUID.fromString("00000000-0000-0000-0000-000000000000");
+            log.info("SCHEDULER: processing user {}", demoUser);
             recommendationService.recommendForUser(demoUser).ifPresent(meal -> log.info("Recommended: {}", meal.getName()));
+            log.info("SCHEDULER DONE");
         } catch (Exception e) {
             log.warn("Scheduler demo user not available");
         }

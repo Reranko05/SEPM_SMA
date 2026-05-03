@@ -52,6 +52,11 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
     _loadSaved();
   }
 
+  // Toggle this to true for quick scheduler testing (temporary)
+  static const bool TEST_SCHEDULER = true;
+  // Single alarm id used to avoid duplicate scheduled callbacks
+  static const int ALARM_ID = 1001;
+
   Future<void> _loadSaved() async {
     final auth = Provider.of<AuthProvider>(context, listen: false);
     if (auth.username == null) return;
@@ -114,6 +119,12 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
         final now = DateTime.now();
         var scheduled = DateTime(now.year, now.month, now.day, t.hour, t.minute);
         var notifyAt = scheduled.subtract(const Duration(hours: 1));
+        // For quick testing override schedule to 30s from now when enabled
+        if (TEST_SCHEDULER) {
+          notifyAt = DateTime.now().add(const Duration(seconds: 30));
+          // ignore: avoid_print
+          print('TEST SCHEDULE: $label at $notifyAt');
+        }
         if (notifyAt.isBefore(now)) notifyAt = notifyAt.add(const Duration(days: 1));
         await notif.schedule(
           id,
@@ -123,7 +134,13 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
         );
         // schedule background callback to fetch recommendation and persist it
         try {
-          await AndroidAlarmManager.oneShotAt(notifyAt, id, backgroundRecommendationCallback, exact: true, wakeup: true);
+          // Cancel any existing alarm with the fixed ID to avoid duplicate triggers
+          try {
+            await AndroidAlarmManager.cancel(ALARM_ID);
+            // ignore: avoid_print
+            print('Cancelled existing alarm id=$ALARM_ID');
+          } catch (_) {}
+          await AndroidAlarmManager.oneShotAt(notifyAt, ALARM_ID, backgroundRecommendationCallback, exact: true, wakeup: true);
         } catch (e) {
           // ignore alarm scheduling errors; UI already scheduled a local notification
           print('Alarm scheduling failed: $e');

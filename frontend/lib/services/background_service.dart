@@ -8,9 +8,17 @@ import 'api_service.dart';
 @pragma('vm:entry-point')
 Future<void> backgroundRecommendationCallback(int id) async {
   try {
+    // Debug: indicate scheduler run
+    // Note: keep this temporary for testing and revert after verification
+    // ignore: avoid_print
+    print('SCHEDULER TRIGGERED');
     final prefs = await SharedPreferences.getInstance();
     final username = prefs.getString('username');
     if (username == null || username.isEmpty) return;
+
+    // Debug: which user is being processed
+    // ignore: avoid_print
+    print('SCHEDULER: username=$username');
 
     final api = ApiService();
     // fetch recommendation
@@ -28,6 +36,9 @@ Future<void> backgroundRecommendationCallback(int id) async {
     }
 
     if (mealJson != null) {
+      // Debug: recommended meal name
+      // ignore: avoid_print
+      print('SCHEDULER: recommended=${mealJson['name']}');
       // persist recommendation for app to pick up
       await prefs.setString('auto_reco', jsonEncode(mealJson));
       // show notification
@@ -35,12 +46,19 @@ Future<void> backgroundRecommendationCallback(int id) async {
       await notifier.init();
       await notifier.show(id, 'Your recommended meal is ready 🍽️', mealJson['name'] ?? 'Tap to view');
 
+      // Debug: notification was sent
+      // ignore: avoid_print
+      print('NOTIFICATION SENT');
+
       // Auto-add to cart from background if user opted in. This posts the meal
       // to the backend cart endpoint and sets a local flag so the UI can react.
       try {
         await api.postJson('/api/cart?username=$username', mealJson, auth: true);
         await prefs.setBool('auto_reco_added', true);
         await notifier.show(id + 1, 'Added to cart', '${mealJson['name']} was added to your cart');
+        // Debug: cart add completed
+        // ignore: avoid_print
+        print('SCHEDULER: added to cart ${mealJson['name']}');
       } catch (e) {
         // ignore background POST errors but keep the persisted recommendation
       }
