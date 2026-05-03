@@ -226,7 +226,12 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
     final prefsProvider = Provider.of<PreferencesProvider>(context);
     final enabled = prefsProvider.smaActive;
     return Scaffold(
-      appBar: AppBar(title: const Text('Preferences'), backgroundColor: Theme.of(context).colorScheme.primary, foregroundColor: Theme.of(context).colorScheme.onPrimary, elevation: 0),
+      appBar: AppBar(
+        title: const Text('Preferences'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Theme.of(context).colorScheme.onPrimary,
+        elevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: SingleChildScrollView(

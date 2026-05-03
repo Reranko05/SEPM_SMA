@@ -34,7 +34,9 @@ class _RecommendationScreenState extends State<RecommendationScreen> {
         Provider.of<RecommendationProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Recommendations')),
+      appBar: AppBar(
+        title: const Text('Recommendations'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(

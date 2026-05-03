@@ -23,7 +23,12 @@ class HomeScreen extends StatelessWidget {
       {'name': 'Kebab Corner', 'image': 'https://picsum.photos/seed/10/600/300', 'rating': '4.3', 'cuisine': 'Grill'},
     ];
     return Scaffold(
-      appBar: AppBar(title: const Text('SMA Home'), backgroundColor: Colors.transparent, elevation: 0, foregroundColor: Colors.black),
+      appBar: AppBar(
+        title: const Text('SMA Home'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.black,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(12),
         child: Column(children: [

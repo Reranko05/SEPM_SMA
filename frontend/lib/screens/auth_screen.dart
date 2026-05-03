@@ -40,10 +40,11 @@ class _AuthScreenState extends State<AuthScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 32),
                 decoration: BoxDecoration(color: Theme.of(context).cardColor, borderRadius: BorderRadius.circular(16)),
                 child: Column(children: [
-                  Icon(Icons.restaurant_menu, size: 48, color: Theme.of(context).colorScheme.secondary),
-                  const SizedBox(height: 12),
+                  // App logo (replaces placeholder icon)
+                  Image.asset('assets/logo.png', height: 64),
+                  const SizedBox(height: 16),
                   const Text('Welcome to SMA', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
                   const Text('Smart Meal Autopilot - Your meals, automated', style: TextStyle(color: Colors.grey)),
                   const SizedBox(height: 18),
                   Padding(

@@ -11,7 +11,6 @@ class CartScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text('Cart (${cart.totalCount})'),
-        centerTitle: false,
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),

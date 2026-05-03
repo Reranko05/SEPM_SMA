@@ -10,7 +10,9 @@ class ProfileScreen extends StatelessWidget {
     final auth = Provider.of<AuthProvider>(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        title: const Text('Profile'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: ListView(
