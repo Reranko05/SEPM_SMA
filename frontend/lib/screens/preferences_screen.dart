@@ -27,7 +27,6 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
   final _proteinCtrl = TextEditingController();
   final _carbsCtrl = TextEditingController();
   String diet = 'OMNIVORE';
-  double spice = 3;
   TimeOfDay breakfast = const TimeOfDay(hour: 8, minute: 0);
   TimeOfDay lunch = const TimeOfDay(hour: 13, minute: 0);
   TimeOfDay snacks = const TimeOfDay(hour: 16, minute: 0);
@@ -64,11 +63,10 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
     final prefsProv = Provider.of<PreferencesProvider>(context, listen: false);
     final saved = await prefsProv.getPreferences(auth.username!);
     if (saved != null && mounted) {
-      setState(() {
+        setState(() {
         diet = saved.dietType;
         _calCtrl.text = saved.calorieLimit.toString();
         _budgetCtrl.text = saved.budget.toStringAsFixed(0);
-        spice = saved.spiceLevel.toDouble();
         _proteinCtrl.text = saved.proteinGoalGrams.toString();
         _carbsCtrl.text = saved.carbsLimitGrams.toString();
       });
@@ -109,7 +107,7 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
       dietType: diet,
       calorieLimit: int.tryParse(_calCtrl.text) ?? 2000,
       budget: double.tryParse(_budgetCtrl.text) ?? 500.0,
-      spiceLevel: spice.toInt(),
+      spiceLevel: prefsProvider.preferences?.spiceLevel ?? 3,
       proteinGoalGrams: int.tryParse(_proteinCtrl.text) ?? 50,
       carbsLimitGrams: int.tryParse(_carbsCtrl.text) ?? 300,
     );
@@ -275,7 +273,6 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
             const SizedBox(height: 8),
             TextField(controller: _budgetCtrl, keyboardType: TextInputType.numberWithOptions(decimal: true), decoration: const InputDecoration(labelText: 'Budget (₹)')),
             const SizedBox(height: 8),
-            Row(children: [const Text('Spice'), Expanded(child: Slider(value: spice, min: 1, max: 5, divisions: 4, onChanged: (v) => setState(() => spice = v)))]),
             const SizedBox(height: 16),
             const Align(alignment: Alignment.centerLeft, child: Text('Meal Schedule', style: TextStyle(fontWeight: FontWeight.bold))),
             const SizedBox(height: 8),

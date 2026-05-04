@@ -60,7 +60,6 @@ class _AiInsightCardState extends State<AiInsightCard> {
           "dietType": widget.meal['dietType'],
           "calorieLimit": widget.prefs['calorieLimit'],
           "budget": widget.prefs['budget'],
-          "spiceLevel": widget.prefs['spiceLevel'],
         }),
       );
 

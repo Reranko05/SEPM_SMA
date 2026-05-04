@@ -34,14 +34,13 @@ public class AiInsightController {
         System.out.println("BODY: " + body);        // add this
         try {
             String prompt = String.format(
-                "The user follows a %s diet with a %s kcal limit and ₹%s budget, spice level: %s. " +
+                "The user follows a %s diet with a %s kcal limit and ₹%s budget. " +
                 "The recommended meal is %s (%s kcal, ₹%s). " +
                 "Respond ONLY in this exact JSON format with no markdown or extra text: " +
                 "{\"insight\": \"2 sentence explanation here\", \"tip\": \"one nutritional tip here\"}",
                 body.get("dietType"),
                 body.get("calorieLimit"),
                 body.get("budget"),
-                body.get("spiceLevel"),
                 body.get("mealName"),
                 body.get("calories"),
                 body.get("price")
