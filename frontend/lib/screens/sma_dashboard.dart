@@ -4,6 +4,7 @@ import '../providers/preferences_provider.dart';
 import '../providers/recommendation_provider.dart';
 import '../providers/cart_provider.dart';
 import '../services/auth_provider.dart';
+import '../widgets/ai_insight_card.dart';
 
 class SMADashboard extends StatefulWidget {
   const SMADashboard({super.key});
@@ -192,6 +193,12 @@ class _SMADashboardState extends State<SMADashboard> {
             ),
 
             const SizedBox(height: 20),
+
+            AiInsightCard(
+              key: ValueKey(rec.meals.isNotEmpty ? rec.meals.first.toJson()['id'] : 'no-meal'),
+              meal: rec.meals.isNotEmpty ? rec.meals.first.toJson() : {},
+              prefs: pref.preferences?.toJson() ?? {},
+            ),
 
             // 🔥 NUTRITION HEADER
             Text(
