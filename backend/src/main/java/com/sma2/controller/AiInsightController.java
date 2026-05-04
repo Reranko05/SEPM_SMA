@@ -25,6 +25,9 @@ public class AiInsightController {
     @Value("${gemini.api.key}")
     private String apiKey;
 
+    @Value("${gemini.model}")
+    private String model;
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     @PostMapping("/meal-insight")
@@ -34,8 +37,8 @@ public class AiInsightController {
         System.out.println("BODY: " + body);        // add this
         try {
             String prompt = String.format(
-                "The user follows a %s diet with a %s kcal limit and ₹%s budget. " +
-                "The recommended meal is %s (%s kcal, ₹%s). " +
+                "The user follows a %s diet with a %s kcal limit and Rs.%s budget. " +
+                "The recommended meal is %s (%s kcal, Rs.%s). " +
                 "Respond ONLY in this exact JSON format with no markdown or extra text: " +
                 "{\"insight\": \"2 sentence explanation here\", \"tip\": \"one nutritional tip here\"}",
                 body.get("dietType"),
@@ -46,7 +49,7 @@ public class AiInsightController {
                 body.get("price")
             );
 
-            String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey;
+            String url = "https://generativelanguage.googleapis.com/v1beta/models/" + model + ":generateContent?key=" + apiKey;
 
             Map<String, Object> part = new HashMap<>();
             part.put("text", prompt);
