@@ -248,7 +248,24 @@ class _PreferencesScreenState extends State<PreferencesScreen> {
                 child: Column(children: [
             TextField(controller: TextEditingController(text: auth.username ?? ''), decoration: const InputDecoration(labelText: 'Username'), enabled: false),
             const SizedBox(height: 8),
-            DropdownButtonFormField<String>(value: diet, items: const [DropdownMenuItem(value: 'OMNIVORE', child: Text('Omnivore')), DropdownMenuItem(value: 'VEGETARIAN', child: Text('Vegetarian')), DropdownMenuItem(value: 'VEGAN', child: Text('Vegan'))], onChanged: (v) => setState(() => diet = v ?? 'OMNIVORE')),
+            DropdownButtonFormField<String>(
+              value: diet,
+              items: const [
+                DropdownMenuItem(
+                  value: 'OMNIVORE',
+                  child: Text('Omnivorous'),
+                ),
+                DropdownMenuItem(
+                  value: 'VEGETARIAN',
+                  child: Text('Vegetarian'),
+                ),
+                DropdownMenuItem(
+                  value: 'NON_VEG',
+                  child: Text('Non-Veg'),
+                ),
+              ],
+              onChanged: (v) => setState(() => diet = v ?? 'OMNIVORE'),
+            ),
             const SizedBox(height: 8),
             TextField(controller: _calCtrl, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Calorie Limit')),
             const SizedBox(height: 8),

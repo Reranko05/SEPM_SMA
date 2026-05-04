@@ -159,8 +159,17 @@ public class RecommendationServiceImpl implements RecommendationService {
 
     private boolean matchesDiet(com.sma2.entity.DietType mealDiet, com.sma2.entity.DietType userDiet) {
         if (userDiet == null) return true;
+        // Strict matching: OMNIVORE allows any meal, VEGETARIAN only vegetarian meals,
+        // NON_VEG only non-veg meals. This prevents mismatched items from being returned.
         if (userDiet == com.sma2.entity.DietType.OMNIVORE) return true;
-        return mealDiet == userDiet;
+        if (userDiet == com.sma2.entity.DietType.VEGETARIAN) {
+            return mealDiet == com.sma2.entity.DietType.VEGETARIAN;
+        }
+        if (userDiet == com.sma2.entity.DietType.NON_VEG) {
+            return mealDiet == com.sma2.entity.DietType.NON_VEG;
+        }
+        // Default conservative behavior
+        return false;
     }
 
     private double score(Meal m, UserPreferences prefs) {
@@ -232,8 +241,17 @@ public class RecommendationServiceImpl implements RecommendationService {
         double avgRating = combo.stream().mapToDouble(Meal::getRating).average().orElse(0.0);
         String name = "Combo: " + combo.stream().map(Meal::getName).collect(Collectors.joining(" + "));
         String id = "combo:" + UUID.randomUUID().toString();
-        // diet type: choose user's diet will be enforced earlier; pick first meal diet for representation
-        com.sma2.entity.DietType diet = combo.get(0).getDietType();
+        // diet type: determine combo diet from all items to accurately represent the combo
+        boolean allVegetarian = combo.stream().allMatch(m -> m.getDietType() == com.sma2.entity.DietType.VEGETARIAN);
+        boolean allNonVeg = combo.stream().allMatch(m -> m.getDietType() == com.sma2.entity.DietType.NON_VEG);
+        com.sma2.entity.DietType diet;
+        if (allVegetarian) {
+            diet = com.sma2.entity.DietType.VEGETARIAN;
+        } else if (allNonVeg) {
+            diet = com.sma2.entity.DietType.NON_VEG;
+        } else {
+            diet = com.sma2.entity.DietType.OMNIVORE;
+        }
         Meal m = new Meal(id, name, totalCalories, totalPrice, avgRating, diet, totalProtein, totalCarbs);
         return m;
     }

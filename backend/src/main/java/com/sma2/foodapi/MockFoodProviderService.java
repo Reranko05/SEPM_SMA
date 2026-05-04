@@ -40,6 +40,8 @@ public class MockFoodProviderService implements FoodProviderService {
         if (up.contains("VEGAN")) return DietType.VEGAN;
         if (up.contains("VEGET" )|| up.equals("VEG")) return DietType.VEGETARIAN;
         if (up.contains("PESC")) return DietType.PESCATARIAN;
+        // map explicit non-vegetarian markers to NON_VEG
+        if (up.contains("NON_VEG") || up.contains("NON-VEG") || up.contains("NONVEG") || (up.contains("NON") && !up.contains("VEGAN") && !up.contains("VEGET"))) return DietType.NON_VEG;
         return DietType.OMNIVORE;
     }
 }

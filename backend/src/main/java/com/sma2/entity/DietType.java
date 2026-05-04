@@ -1,5 +1,5 @@
 package com.sma2.entity;
 
 public enum DietType {
-    OMNIVORE, VEGETARIAN, VEGAN, PESCATARIAN
+    OMNIVORE, VEGETARIAN, VEGAN, PESCATARIAN, NON_VEG
 }
